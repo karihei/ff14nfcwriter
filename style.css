@@ -122,6 +122,34 @@ input[type="text"]:focus {
   color: var(--accent);
 }
 
+.character-preview {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0 0 18px;
+  padding: 10px 12px;
+  background: #0f1320;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.95rem;
+}
+
+.character-preview[hidden] {
+  display: none;
+}
+
+.character-preview img {
+  border-radius: 6px;
+  background: var(--border);
+  object-fit: cover;
+}
+
+.character-preview.loading span,
+.character-preview.not-found span {
+  color: var(--text-dim);
+  font-size: 0.85rem;
+}
+
 button {
   width: 100%;
   padding: 12px;

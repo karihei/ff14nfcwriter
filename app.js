@@ -6,6 +6,9 @@ const urlPreview = document.getElementById("url-preview");
 const writeBtn = document.getElementById("write-btn");
 const statusEl = document.getElementById("status");
 const unsupportedEl = document.getElementById("unsupported");
+const characterPreview = document.getElementById("character-preview");
+const characterImage = document.getElementById("character-image");
+const characterName = document.getElementById("character-name");
 
 const isSupported = "NDEFReader" in window;
 
@@ -24,6 +27,65 @@ function updatePreview() {
 
   urlPreview.textContent = valid ? buildUrl(id) : "—";
   writeBtn.disabled = !valid || !isSupported;
+  scheduleCharacterLookup(valid ? id : null);
+}
+
+let lookupController = null;
+let debounceTimer = null;
+
+function resetCharacterPreview() {
+  characterPreview.hidden = true;
+  characterPreview.classList.remove("loading", "not-found");
+  characterImage.src = "";
+  characterName.textContent = "";
+}
+
+function scheduleCharacterLookup(id) {
+  clearTimeout(debounceTimer);
+  if (lookupController) {
+    lookupController.abort();
+  }
+
+  if (!id) {
+    resetCharacterPreview();
+    return;
+  }
+
+  debounceTimer = setTimeout(() => lookupCharacter(id), 500);
+}
+
+async function lookupCharacter(id) {
+  lookupController = new AbortController();
+  const { signal } = lookupController;
+
+  characterPreview.hidden = false;
+  characterPreview.classList.add("loading");
+  characterPreview.classList.remove("not-found");
+  characterImage.src = "";
+  characterName.textContent = "読み込み中…";
+
+  try {
+    const res = await fetch(`/api/character/${id}`, { signal });
+    const data = await res.json();
+    if (signal.aborted) return;
+
+    characterPreview.classList.remove("loading");
+
+    if (!data.found) {
+      characterPreview.classList.add("not-found");
+      characterName.textContent = "キャラクターが見つかりません";
+      return;
+    }
+
+    characterName.textContent = data.name;
+    characterImage.alt = data.name;
+    characterImage.src = data.imageUrl || "";
+  } catch (err) {
+    if (signal.aborted || err.name === "AbortError") return;
+    characterPreview.classList.remove("loading");
+    characterPreview.classList.add("not-found");
+    characterName.textContent = "プレビューを取得できませんでした";
+  }
 }
 
 if (!isSupported) {
