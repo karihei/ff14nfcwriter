@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FF14 NFC Writer</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="card">
+    <h1>FF14 NFC Writer</h1>
+    <p class="desc">
+      キャラクターIDを入力してLodestoneのプロフィールURLを生成し、
+      NFCタグに書き込みます。
+    </p>
+
+    <div id="unsupported" class="notice notice-error" hidden>
+      ⚠️ お使いのブラウザはWeb NFCに対応していません。<br>
+      <strong>Android版Google Chrome</strong>でこのページをHTTPS（またはlocalhost）経由で開いてください。
+    </div>
+
+    <form id="nfc-form">
+      <label for="character-id">キャラクターID</label>
+      <input
+        type="text"
+        id="character-id"
+        name="character-id"
+        inputmode="numeric"
+        pattern="[0-9]+"
+        placeholder="例: 4813522"
+        autocomplete="off"
+        required
+      >
+      <p class="hint">
+        LodestoneのURL <code>https://jp.finalfantasyxiv.com/lodestone/character/<strong>4813522</strong>/</code>
+        の数字部分です。
+      </p>
+
+      <div class="preview">
+        <span class="preview-label">書き込むURL:</span>
+        <code id="url-preview">—</code>
+      </div>
+
+      <button type="submit" id="write-btn" disabled>NFCタグに書き込む</button>
+    </form>
+
+    <div id="status" class="status" role="status" aria-live="polite"></div>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
