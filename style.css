@@ -201,3 +201,223 @@ button:disabled {
 code {
   font-family: "Consolas", "SFMono-Regular", monospace;
 }
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 7, 14, 0.72);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 100;
+}
+
+.modal-overlay[hidden] {
+  display: none;
+}
+
+.modal {
+  width: 100%;
+  max-width: 360px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 24px;
+  text-align: center;
+}
+
+.modal-panel[hidden] {
+  display: none;
+}
+
+.modal-heading {
+  margin: 0 0 16px;
+  font-size: 1.1rem;
+}
+
+.modal-character {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.modal-character img {
+  border-radius: 8px;
+  background: var(--border);
+  object-fit: cover;
+}
+
+.modal-character img[hidden] {
+  display: none;
+}
+
+.modal-character span {
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+
+.modal-question {
+  margin: 0 0 20px;
+  color: var(--text-dim);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.modal-actions .btn {
+  flex: 1;
+  padding: 11px;
+  border-radius: 8px;
+  border: none;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: var(--accent-hover);
+}
+
+.btn-secondary {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+
+.btn-secondary:hover {
+  border-color: var(--accent);
+}
+
+.nfc-infographic {
+  display: block;
+  margin: 0 auto 8px;
+}
+
+.phone-body {
+  fill: #0f1320;
+  stroke: var(--accent);
+  stroke-width: 2.5;
+}
+
+.camera-bump {
+  fill: var(--border);
+}
+
+.camera-lens {
+  fill: #0a0d17;
+  stroke: var(--text-dim);
+  stroke-width: 1;
+}
+
+.wave {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 3;
+  stroke-linecap: round;
+  opacity: 0;
+  animation: nfc-pulse 1.6s ease-out infinite;
+}
+
+.wave-2 {
+  animation-delay: 0.25s;
+}
+
+.wave-3 {
+  animation-delay: 0.5s;
+}
+
+@keyframes nfc-pulse {
+  0% {
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  70% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.nfc-tag {
+  animation: nfc-tap 1.6s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.tag-ring {
+  fill: none;
+  stroke: var(--text-dim);
+  stroke-width: 3;
+}
+
+.tag-body {
+  fill: var(--accent);
+}
+
+.tag-chip {
+  fill: #0f1320;
+  opacity: 0.6;
+}
+
+@keyframes nfc-tap {
+  0% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(70px);
+  }
+  55% {
+    transform: translateY(70px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+.modal-instruction {
+  margin: 4px 0;
+  font-size: 0.92rem;
+}
+
+.modal-instruction-sub {
+  margin: 0 0 16px;
+  font-size: 0.82rem;
+  color: var(--text-dim);
+}
+
+.modal-result-message {
+  white-space: pre-line;
+  margin: 8px 0 20px;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.modal-result-message.success {
+  color: var(--success-text);
+}
+
+.modal-result-message.error {
+  color: var(--error-text);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wave,
+  .nfc-tag {
+    animation: none;
+  }
+}

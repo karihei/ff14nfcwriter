@@ -52,6 +52,54 @@
     <div id="status" class="status" role="status" aria-live="polite"></div>
   </main>
 
+  <div id="nfc-modal" class="modal-overlay" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-heading">
+      <div id="modal-state-confirm" class="modal-panel">
+        <h2 id="modal-heading" class="modal-heading">書き込み内容の確認</h2>
+        <div class="modal-character">
+          <img id="modal-character-image" alt="" width="88" height="120" hidden>
+          <span id="modal-character-name"></span>
+        </div>
+        <p class="modal-question">このキャラクターをNFCタグに書き込みます。よろしいですか？</p>
+        <div class="modal-actions">
+          <button type="button" id="modal-cancel-btn" class="btn btn-secondary">キャンセル</button>
+          <button type="button" id="modal-confirm-btn" class="btn btn-primary">書き込む</button>
+        </div>
+      </div>
+
+      <div id="modal-state-waiting" class="modal-panel" hidden>
+        <svg class="nfc-infographic" viewBox="0 0 220 260" width="180" height="212" role="img" aria-label="NFCタグをスマートフォンの背面に近づける操作のイラスト">
+          <rect x="55" y="70" width="110" height="180" rx="18" class="phone-body"></rect>
+          <rect x="70" y="84" width="32" height="32" rx="10" class="camera-bump"></rect>
+          <circle cx="80" cy="94" r="6" class="camera-lens"></circle>
+          <circle cx="94" cy="104" r="4.5" class="camera-lens"></circle>
+          <g class="nfc-waves" transform="translate(140,150)">
+            <path d="M -10,-20 A 26 26 0 0 1 16,6" class="wave wave-1"></path>
+            <path d="M -18,-30 A 40 40 0 0 1 24,16" class="wave wave-2"></path>
+            <path d="M -26,-40 A 54 54 0 0 1 32,26" class="wave wave-3"></path>
+          </g>
+          <g class="nfc-tag">
+            <circle cx="140" cy="20" r="10" class="tag-ring"></circle>
+            <rect x="120" y="32" width="40" height="40" rx="10" class="tag-body"></rect>
+            <circle cx="140" cy="52" r="8" class="tag-chip"></circle>
+          </g>
+        </svg>
+        <p class="modal-instruction">① NFCタグをスマホの背面（カメラ付近）に近づけてください</p>
+        <p class="modal-instruction-sub">② そのまま少し待つと書き込みが完了します</p>
+        <div class="modal-actions">
+          <button type="button" id="modal-waiting-cancel-btn" class="btn btn-secondary">キャンセル</button>
+        </div>
+      </div>
+
+      <div id="modal-state-result" class="modal-panel" hidden>
+        <p id="modal-result-message" class="modal-result-message"></p>
+        <div class="modal-actions">
+          <button type="button" id="modal-close-btn" class="btn btn-primary">閉じる</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="app.js"></script>
 </body>
 </html>

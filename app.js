@@ -10,7 +10,23 @@ const characterPreview = document.getElementById("character-preview");
 const characterImage = document.getElementById("character-image");
 const characterName = document.getElementById("character-name");
 
+const modalOverlay = document.getElementById("nfc-modal");
+const modalStateConfirm = document.getElementById("modal-state-confirm");
+const modalStateWaiting = document.getElementById("modal-state-waiting");
+const modalStateResult = document.getElementById("modal-state-result");
+const modalCharacterImage = document.getElementById("modal-character-image");
+const modalCharacterName = document.getElementById("modal-character-name");
+const modalCancelBtn = document.getElementById("modal-cancel-btn");
+const modalConfirmBtn = document.getElementById("modal-confirm-btn");
+const modalWaitingCancelBtn = document.getElementById("modal-waiting-cancel-btn");
+const modalCloseBtn = document.getElementById("modal-close-btn");
+const modalResultMessage = document.getElementById("modal-result-message");
+
 const isSupported = "NDEFReader" in window;
+
+let latestCharacterInfo = null;
+let pendingUrl = null;
+let activeWriteController = null;
 
 function buildUrl(id) {
   return `${LODESTONE_BASE}${id}/`;
@@ -38,6 +54,7 @@ function resetCharacterPreview() {
   characterPreview.classList.remove("loading", "not-found");
   characterImage.src = "";
   characterName.textContent = "";
+  latestCharacterInfo = null;
 }
 
 function scheduleCharacterLookup(id) {
@@ -63,6 +80,7 @@ async function lookupCharacter(id) {
   characterPreview.classList.remove("not-found");
   characterImage.src = "";
   characterName.textContent = "読み込み中…";
+  latestCharacterInfo = null;
 
   try {
     const res = await fetch(`/api/character/${id}`, { signal });
@@ -74,17 +92,20 @@ async function lookupCharacter(id) {
     if (!data.found) {
       characterPreview.classList.add("not-found");
       characterName.textContent = "キャラクターが見つかりません";
+      latestCharacterInfo = { found: false };
       return;
     }
 
     characterName.textContent = data.name;
     characterImage.alt = data.name;
     characterImage.src = data.imageUrl || "";
+    latestCharacterInfo = { found: true, name: data.name, imageUrl: data.imageUrl };
   } catch (err) {
     if (signal.aborted || err.name === "AbortError") return;
     characterPreview.classList.remove("loading");
     characterPreview.classList.add("not-found");
     characterName.textContent = "プレビューを取得できませんでした";
+    latestCharacterInfo = null;
   }
 }
 
@@ -96,7 +117,7 @@ if (!isSupported) {
 idInput.addEventListener("input", updatePreview);
 updatePreview();
 
-form.addEventListener("submit", async (event) => {
+form.addEventListener("submit", (event) => {
   event.preventDefault();
 
   const id = idInput.value.trim();
@@ -105,27 +126,86 @@ form.addEventListener("submit", async (event) => {
     return;
   }
 
-  const url = buildUrl(id);
+  pendingUrl = buildUrl(id);
+  openConfirmModal();
+});
 
+function openConfirmModal() {
+  if (latestCharacterInfo && latestCharacterInfo.found) {
+    modalCharacterImage.hidden = false;
+    modalCharacterImage.src = latestCharacterInfo.imageUrl || "";
+    modalCharacterImage.alt = latestCharacterInfo.name;
+    modalCharacterName.textContent = latestCharacterInfo.name;
+  } else {
+    modalCharacterImage.hidden = true;
+    modalCharacterImage.src = "";
+    modalCharacterName.textContent = "（キャラクター名を取得できませんでした）";
+  }
+
+  showModalPanel(modalStateConfirm);
+  modalOverlay.hidden = false;
+}
+
+function showModalPanel(panel) {
+  [modalStateConfirm, modalStateWaiting, modalStateResult].forEach((p) => {
+    p.hidden = p !== panel;
+  });
+}
+
+function closeModal() {
+  modalOverlay.hidden = true;
+  pendingUrl = null;
+}
+
+modalCancelBtn.addEventListener("click", closeModal);
+modalCloseBtn.addEventListener("click", closeModal);
+
+modalWaitingCancelBtn.addEventListener("click", () => {
+  if (activeWriteController) {
+    activeWriteController.abort();
+  }
+  closeModal();
+});
+
+modalConfirmBtn.addEventListener("click", async () => {
+  const url = pendingUrl;
+  if (!url) return;
+
+  showModalPanel(modalStateWaiting);
   writeBtn.disabled = true;
-  setStatus("NFCタグをスマートフォンの背面にかざしてください…", "info");
+  activeWriteController = new AbortController();
 
   try {
     const ndef = new NDEFReader();
-    await ndef.write({
-      records: [{ recordType: "url", data: url }],
-    });
-    setStatus(`✅ 書き込み完了！今すぐタグをスマホから離してください。\n${url}`, "success lift-now");
+    await ndef.write(
+      { records: [{ recordType: "url", data: url }] },
+      { signal: activeWriteController.signal }
+    );
+    showModalResult(
+      `✅ 書き込み完了！\n今すぐタグをスマホから離してください。\n${url}`,
+      "success"
+    );
     if (navigator.vibrate) {
       navigator.vibrate([120, 60, 120]);
     }
     holdNfcBriefly();
   } catch (err) {
-    setStatus(`書き込みに失敗しました: ${describeError(err)}`, "error");
+    if (err.name === "AbortError") {
+      closeModal();
+    } else {
+      showModalResult(`書き込みに失敗しました: ${describeError(err)}`, "error");
+    }
   } finally {
     writeBtn.disabled = false;
+    activeWriteController = null;
   }
 });
+
+function showModalResult(message, type) {
+  modalResultMessage.textContent = message;
+  modalResultMessage.className = `modal-result-message ${type}`;
+  showModalPanel(modalStateResult);
+}
 
 // 書き込み直後もしばらくNFCの読み取りを保持し、Androidの標準タグ検出
 // （ブラウザが自動でURLを開く挙動）が割り込む隙を減らす。
