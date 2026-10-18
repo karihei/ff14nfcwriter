@@ -53,13 +53,32 @@ form.addEventListener("submit", async (event) => {
     await ndef.write({
       records: [{ recordType: "url", data: url }],
     });
-    setStatus(`書き込みに成功しました: ${url}`, "success");
+    setStatus(`✅ 書き込み完了！今すぐタグをスマホから離してください。\n${url}`, "success lift-now");
+    if (navigator.vibrate) {
+      navigator.vibrate([120, 60, 120]);
+    }
+    holdNfcBriefly();
   } catch (err) {
     setStatus(`書き込みに失敗しました: ${describeError(err)}`, "error");
   } finally {
     writeBtn.disabled = false;
   }
 });
+
+// 書き込み直後もしばらくNFCの読み取りを保持し、Androidの標準タグ検出
+// （ブラウザが自動でURLを開く挙動）が割り込む隙を減らす。
+// これは軽減策であり、完全な防止は保証できない。
+function holdNfcBriefly(durationMs = 2500) {
+  if (!isSupported) return;
+  try {
+    const guard = new NDEFReader();
+    const controller = new AbortController();
+    guard.scan({ signal: controller.signal }).catch(() => {});
+    setTimeout(() => controller.abort(), durationMs);
+  } catch (_) {
+    // ベストエフォートのため失敗は無視する
+  }
+}
 
 function describeError(err) {
   if (!err) return "不明なエラー";
