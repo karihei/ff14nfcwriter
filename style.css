@@ -101,6 +101,14 @@ input[type="text"]:focus {
   color: var(--text-dim);
 }
 
+.hint a {
+  color: var(--accent);
+}
+
+.hint a:hover {
+  color: var(--accent-hover);
+}
+
 .preview {
   margin: 18px 0;
   padding: 10px 12px;
