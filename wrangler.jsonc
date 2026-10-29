@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "ff14nftwriter",
+  "name": "ff14nfcwriter",
   "main": "worker.js",
   "compatibility_date": "2026-10-12",
   "observability": {
