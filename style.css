@@ -30,8 +30,8 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: 24px 16px;
+  justify-content: flex-start;
+  padding: 16px 16px 32px;
   background-color: var(--bg);
   background-image:
     linear-gradient(var(--grid) 2px, transparent 2px),
@@ -80,7 +80,7 @@ h1 {
 }
 
 .site-header {
-  margin-bottom: 22px;
+  margin-bottom: 18px;
   text-align: center;
 }
 
@@ -89,6 +89,15 @@ h1 {
   width: 220px;
   max-width: 70vw;
   height: auto;
+}
+
+.title-sub {
+  display: inline-block;
+  margin: 6px 0 0;
+  padding: 2px 8px;
+  background: var(--ink);
+  color: var(--yellow);
+  font-size: 0.9rem;
 }
 
 @keyframes bob {

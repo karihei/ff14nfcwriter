@@ -198,7 +198,7 @@ document.querySelectorAll(".type-option").forEach((btn) => {
   });
 });
 
-backBtn.addEventListener("click", () => {
+function goToSelectScreen() {
   if (navigatedInApp) {
     history.back();
   } else {
@@ -206,7 +206,9 @@ backBtn.addEventListener("click", () => {
     history.replaceState(null, "", location.pathname + location.search);
     render();
   }
-});
+}
+
+backBtn.addEventListener("click", goToSelectScreen);
 
 window.addEventListener("hashchange", render);
 
@@ -349,8 +351,25 @@ function closeModal() {
   setStep(2);
 }
 
+// 書き込み成功後、この時間が経ったら自動で最初の選択画面に戻る
+const RETURN_TO_START_DELAY_MS = 3000;
+let returnToStartTimer = null;
+
+function returnToStart() {
+  clearTimeout(returnToStartTimer);
+  returnToStartTimer = null;
+  closeModal();
+  goToSelectScreen();
+}
+
 modalCancelBtn.addEventListener("click", closeModal);
-modalCloseBtn.addEventListener("click", closeModal);
+modalCloseBtn.addEventListener("click", () => {
+  if (returnToStartTimer) {
+    returnToStart();
+  } else {
+    closeModal();
+  }
+});
 
 modalWaitingCancelBtn.addEventListener("click", () => {
   if (activeWriteController) {
@@ -375,13 +394,14 @@ modalConfirmBtn.addEventListener("click", async () => {
       { signal: activeWriteController.signal }
     );
     showModalResult(
-      `✅ 書き込み完了！\n今すぐタグをスマホから離してください。\n${url}`,
+      `✅ 書き込み完了！\n今すぐタグをスマホから離してください。\n${url}\n\n${RETURN_TO_START_DELAY_MS / 1000}秒後に最初の画面に戻ります`,
       "success"
     );
     if (navigator.vibrate) {
       navigator.vibrate([120, 60, 120]);
     }
     holdNfcBriefly();
+    returnToStartTimer = setTimeout(returnToStart, RETURN_TO_START_DELAY_MS);
   } catch (err) {
     if (err.name === "AbortError") {
       closeModal();
@@ -433,3 +453,11 @@ function describeError(err) {
 }
 
 render();
+
+// ---- PWA（ホーム画面に追加してアドレスバーなしで使えるようにする） ----
+
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("/sw.js").catch(() => {
+    // 登録できなくても通常のページとしては動くため無視する
+  });
+}
